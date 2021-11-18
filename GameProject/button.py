@@ -1,5 +1,6 @@
 import pygame
 
+
 class button:
     # initialise class attributes
     def __init__(self, x, y, image, scale):
@@ -24,7 +25,7 @@ class button:
         # checks for mouse click when cursor is in collision range
         # changes boolean if mouse pressed and if boolean hasn't been changed
         if self.rect.collidepoint(mouse):
-            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False:
+            if pygame.mouse.get_pressed()[0] == 1 and not self.clicked:
                 self.clicked = True
                 action = True
 

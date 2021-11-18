@@ -13,8 +13,6 @@ class Player:
         self.index = 0
         # the number of iterations that has been done (needed for adjusting animation speed)
         self.counter = 0
-
-        self.game_state = 0
         # instance of level class - needed for collision
         self.level = Level(levels, screen_size)
 
@@ -36,15 +34,16 @@ class Player:
             self.player_jump_left = image_jump_left
 
         self.player_sprite = self.player_right[self.index]
-        self.player_rect = self.player_sprite.get_rect()
-        self.player_rect.x = x
-        self.player_rect.y = y
-        self.player_dimensions = [self.player_sprite.get_width(), self.player_sprite.get_height()]
+        self.rect = self.player_sprite.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.player_width = self.player_sprite.get_width()
+        self.player_height = self.player_sprite.get_height()
         self.player_y_velocity = 0
         self.jumped = False
         self.direction = 1
 
-    def update(self):
+    def update(self, state):
 
         # local variables for method
         # coordinate changes - will make collision calculations easier
@@ -110,32 +109,31 @@ class Player:
         # collision check
         for tile in self.level.tile_layout:
             # collision check in x direction
-            if tile[1].colliderect(self.player_rect.x + x_change, self.player_rect.y, self.player_dimensions[0],
-                                   self.player_dimensions[1]):
+            if tile[1].colliderect(self.rect.x + x_change, self.rect.y, self.player_width,
+                                   self.player_height):
                 x_change = 0
             # collision check in y direction
-            if tile[1].colliderect(self.player_rect.x, self.player_rect.y + y_change, self.player_dimensions[0],
-                                   self.player_dimensions[1]):
+            if tile[1].colliderect(self.rect.x, self.rect.y + y_change, self.player_width,
+                                   self.player_height):
                 # below tile collision (jumping)
                 if self.player_y_velocity < 0:
-                    y_change = tile[1].bottom - self.player_rect.top
+                    y_change = tile[1].bottom - self.rect.top
                     self.player_y_velocity = 0
                 # above tile collision (falling)
                 elif self.player_y_velocity >= 0:
-                    y_change = tile[1].top - self.player_rect.bottom
+                    y_change = tile[1].top - self.rect.bottom
                     self.player_y_velocity = 0
                     self.jumped = False
 
         # exit collision
-        #if pygame.sprite.spritecollide(self, self.level.exit, False):
-            #self.game_state = 1
-            #print(self.game_state)
+        if pygame.sprite.spritecollide(self, self.level.exit_sprite, False):
+            state = 2
 
         # player coord updates
-        self.player_rect.x += x_change
-        self.player_rect.y += y_change
+        self.rect.x += x_change
+        self.rect.y += y_change
 
         # draws player on screen
-        screen.blit(self.player_sprite, self.player_rect)
+        screen.blit(self.player_sprite, self.rect)
 
-
+        return state

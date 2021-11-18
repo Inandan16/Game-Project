@@ -1,10 +1,6 @@
 # imports libraries / files
 from button import button
 from settings import *
-from level import *
-from player import *
-from game_data import *
-import time
 
 # initialise pygame
 pygame.init()
@@ -13,18 +9,15 @@ main_clock = pygame.time.Clock()
 
 class Menu:
     # initialise class
-    def __init__(self, screen):
+    def __init__(self, surface):
         # class attributes
-        self.screen = screen
+        self.screen = surface
         self.screen_size = screen_size
         self.pixel_font = pygame.font.Font("Assets/ThaleahFat.ttf", 50)
-        self.load_level = Level(levels, self.screen)
-        self.load_player = Player(100, screen_size[1] - 275)
 
         # load images
-        self.background = pygame.image.load("Assets/Mockup2x.png")
-        self.intro_background = pygame.image.load("Assets/background2.png")
-        self.level_background = pygame.image.load("Assets/BG1.png")
+        self.background = pygame.image.load("Assets/Mockup2x.png").convert_alpha()
+        self.intro_background = pygame.image.load("Assets/background2.png").convert_alpha()
         self.blank_button_image = pygame.image.load(
             "Assets/EmptyButton.png"
         ).convert_alpha()
@@ -122,362 +115,318 @@ class Menu:
 
         pygame.display.update()
 
-        # keeps the intro on screen for 2.25 seconds
-        time.sleep(2.25)
-
     # menu functions
-    def main_menu(self):
-        running = True
-        while running:
+    def main_menu(self, state):
+        if state == 0:
+            while True:
 
-            self.set_background(self.background)
+                self.set_background(self.background)
 
-            # screen title
-            draw_text(
-                "Main Menu",
-                self.pixel_font,
-                (255, 255, 255),
-                screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
+                # screen title
+                draw_text(
+                    "Main Menu",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
 
-            # button text and draw function from button class
-            screen.blit(self.singleplayer_text, (((screen_size[0] / 2) - 125), 145))
-            if self.singleplayer_button.draw(screen):
-                self.singleplayer()
+                # button text and draw function from button class
+                screen.blit(self.singleplayer_text, (((screen_size[0] / 2) - 125), 145))
+                if self.singleplayer_button.draw(screen):
+                    state = self.singleplayer(state)
+                    if state != 0:
+                        return state
 
-            screen.blit(self.multiplayer_text, (((screen_size[0] / 2) - 110), 345))
-            if self.multiplayer_button.draw(screen):
-                self.multiplayer()
+                screen.blit(self.multiplayer_text, (((screen_size[0] / 2) - 110), 345))
+                if self.multiplayer_button.draw(screen):
+                    self.multiplayer(state)
 
-            screen.blit(self.options_text, (((screen_size[0] / 2) - 60), 545))
-            if self.options_button.draw(screen):
-                self.options()
+                screen.blit(self.options_text, (((screen_size[0] / 2) - 60), 545))
+                if self.options_button.draw(screen):
+                    self.options(state)
 
-            screen.blit(self.quit_text, (((screen_size[0] / 2) - 75), 745))
-            if self.quit_button.draw(screen):
-                running = False
+                screen.blit(self.quit_text, (((screen_size[0] / 2) - 75), 745))
+                if self.quit_button.draw(screen):
+                    pygame.quit()
+                    sys.exit()
 
-            # puts loop through event queue
-            for event in pygame.event.get():
+                # puts loop through event queue
+                for event in pygame.event.get():
 
-                # checks for quit event
-                if event.type == pygame.QUIT:
+                    # checks for quit event
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                # updates the game window to load images
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def singleplayer(self, state):
+        if state == 0:
+            while True:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "singleplayer",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                self.screen.blit(
+                    self.story_mode_text,
+                    (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
+                )
+                if self.story_mode_button.draw(self.screen):
+                    state = self.singleplayer_story_mode(state)
+                    if state != 0:
+                        return state
+
+                self.screen.blit(
+                    self.freeplay_text,
+                    (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
+                )
+                if self.freeplay_button.draw(self.screen):
+                    self.character_selection(state)
+
+                if self.back_button.draw(self.screen):
+                    return state
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def multiplayer(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "multiplayer",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                self.screen.blit(
+                    self.story_mode_text,
+                    (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
+                )
+                if self.story_mode_button.draw(self.screen):
+                    self.story_connect(state)
+
+                self.screen.blit(
+                    self.freeplay_text,
+                    (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
+                )
+                if self.freeplay_button.draw(self.screen):
+                    self.freeplay_connect(state)
+
+                if self.back_button.draw(self.screen):
                     running = False
 
-                # checks for key press events and executes corresponding events
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            # updates the game window to load images
-            pygame.display.update()
-            main_clock.tick(60)
-
-        pygame.quit()
-        sys.exit()
-
-    def singleplayer(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "singleplayer",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            self.screen.blit(
-                self.story_mode_text,
-                (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
-            )
-            if self.story_mode_button.draw(self.screen):
-                self.singleplayer_story_mode()
-
-            self.screen.blit(
-                self.freeplay_text,
-                (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
-            )
-            if self.freeplay_button.draw(self.screen):
-                self.character_selection()
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def multiplayer(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "multiplayer",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            self.screen.blit(
-                self.story_mode_text,
-                (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
-            )
-            if self.story_mode_button.draw(self.screen):
-                self.story_connect()
-
-            self.screen.blit(
-                self.freeplay_text,
-                (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
-            )
-            if self.freeplay_button.draw(self.screen):
-                self.freeplay_connect()
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def options(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "options",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def singleplayer_story_mode(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "Story Mode",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            self.screen.blit(
-                self.begin_text,
-                (((self.screen_size[0] / 2) - 125), (self.screen_size[1] / 2)),
-            )
-
-            if self.begin_button.draw(self.screen):
-                self.level_screen()
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def story_connect(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "Pick Connection Method",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def freeplay_connect(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "Pick Connection Method",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def multiplayer_mode(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "Pick Multiplayer Mode",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            self.screen.blit(
-                self.versus_text,
-                (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
-            )
-            if self.versus_button.draw(self.screen):
-                self.character_selection()
-
-            self.screen.blit(
-                self.work_together_text,
-                (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
-            )
-            if self.work_together_button.draw(self.screen):
-                self.character_selection()
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def character_selection(self):
-        running = True
-        while running:
-
-            self.set_background(self.background)
-
-            draw_text(
-                "Character Selection",
-                self.pixel_font,
-                (255, 255, 255),
-                self.screen,
-                ((pygame.display.Info().current_w / 2) + 15),
-                35,
-            )
-
-            if self.back_button.draw(self.screen):
-                running = False
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-                if event.type == KEYDOWN:
-                    if event.key == K_ESCAPE:
-                        running = False
-
-            pygame.display.update()
-            main_clock.tick(60)
-
-    def level_screen(self):
-        running = True
-        while running:
-
-            # loads level background
-            self.set_background(self.level_background)
-
-            # loads level
-            self.load_level.run()
-
-            # loads player
-            self.load_player.update()
-
-            for event in pygame.event.get():
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()
-
-            pygame.display.update()
-            main_clock.tick(60)
-
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def options(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "options",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                if self.back_button.draw(self.screen):
+                    running = False
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def singleplayer_story_mode(self, state):
+        if state == 0:
+            while True:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "Story Mode",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                self.screen.blit(
+                    self.begin_text,
+                    (((self.screen_size[0] / 2) - 125), (self.screen_size[1] / 2)),
+                )
+
+                if self.begin_button.draw(self.screen):
+                    state = 1
+                    return state
+
+                if self.back_button.draw(self.screen):
+                    return state
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def story_connect(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "Pick Connection Method",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                if self.back_button.draw(self.screen):
+                    running = False
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def freeplay_connect(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "Pick Connection Method",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                if self.back_button.draw(self.screen):
+                    running = False
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def multiplayer_mode(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "Pick Multiplayer Mode",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                self.screen.blit(
+                    self.versus_text,
+                    (((self.screen_size[0] / 2) - 500), (self.screen_size[1] / 2)),
+                )
+                if self.versus_button.draw(self.screen):
+                    self.character_selection(state)
+
+                self.screen.blit(
+                    self.work_together_text,
+                    (((self.screen_size[0] / 2) + 250), (self.screen_size[1] / 2)),
+                )
+                if self.work_together_button.draw(self.screen):
+                    self.character_selection(state)
+
+                if self.back_button.draw(self.screen):
+                    running = False
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)
+
+    def character_selection(self, state):
+        if state == 0:
+            running = True
+            while running:
+
+                self.set_background(self.background)
+
+                draw_text(
+                    "Character Selection",
+                    self.pixel_font,
+                    (255, 255, 255),
+                    self.screen,
+                    ((pygame.display.Info().current_w / 2) + 15),
+                    35,
+                )
+
+                if self.back_button.draw(self.screen):
+                    running = False
+
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+
+                pygame.display.update()
+                main_clock.tick(fps)

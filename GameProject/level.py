@@ -1,6 +1,4 @@
 # import libraries / files
-import pygame.sprite
-
 from support import *
 from settings import *
 
@@ -10,15 +8,20 @@ class Level:
 
     # initialise class attributes
     def __init__(self, level_data, surface):
-        self.surface = surface
+        self.screen = surface
         self.level_num = 1
 
+        # background image
+        self.level_background = pygame.image.load("Assets/BG1.png").convert_alpha()
+
         # gets the level csv data and adds it to this variable
-        level_layout = import_level_data(level_data[f'{self.level_num}'])
+        self.level_layout = import_level_data(level_data[f'{self.level_num}'])
 
         # array to hold the tile sprite and its coordinates
         self.tile_layout = []
-        self.exit = pygame.sprite.Group()
+
+        # sprite group for exit
+        self.exit_sprite = pygame.sprite.Group()
 
         # load tile images
         dirt = pygame.image.load('Assets/Tiles/grassCenter.png').convert_alpha()
@@ -27,7 +30,7 @@ class Level:
 
         # enumerate - keeps track of how many iterations have occurred
         # goes through the y position
-        for row_index, row in enumerate(level_layout):
+        for row_index, row in enumerate(self.level_layout):
             # goes through the x position
             for column_index, value in enumerate(row):
 
@@ -58,44 +61,23 @@ class Level:
                     self.tile_layout.append(value)
 
                 elif value == '57':
-                    exit_tile = Exit(column_index * tile_size, row_index * tile_size - 40)
-                    self.exit.add(exit_tile)
-                    print(self.exit)
+                    tile = Exit(column_index * tile_size, row_index * tile_size - 40)
+                    self.exit_sprite.add(tile)
 
     # method to run level
     def run(self):
+        screen.blit(pygame.transform.scale(self.level_background, screen_size), (0, 0))
         # goes through the array
         for value in self.tile_layout:
             # draws each tile on screen
-            self.surface.blit(value[0], value[1])
-
-        self.exit.draw(self.surface)
+            screen.blit(value[0], value[1])
 
 
 class Exit(pygame.sprite.Sprite):
     def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        image = pygame.image.load('Assets/Tiles/exit.png').convert_alpha()
-        self.image = pygame.transform.scale(image, (tile_size, tile_size + 40))
+        img = pygame.image.load('Assets/Tiles/exit.png').convert_alpha()
+        self.image = pygame.transform.scale(img, (tile_size, (tile_size + 40)))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

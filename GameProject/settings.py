@@ -1,6 +1,7 @@
 # imports pygame
 # files that import this file will be able to use these imports as well
-import pygame, sys
+import pygame
+import sys
 from pygame.locals import *
 
 # tile variables
@@ -24,3 +25,6 @@ screen_size = [(horizontal_tiles * tile_size), (vertical_tiles * tile_size)]
 # window dimensions and caption
 screen = pygame.display.set_mode(screen_size)
 pygame.display.set_caption("Game")
+
+# fps
+fps = 60
